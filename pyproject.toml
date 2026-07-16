@@ -1,0 +1,119 @@
+[project]
+name = "my-first-project"
+version = "0.1.0"
+description = "A Python project with modern tooling"
+authors = [
+    {name = "sayxiaoye", email = "sayxiaoye@outlook.com"},
+]
+dependencies = [
+    "httpx>=0.28.1",
+    "pyyaml>=6.0",
+    ]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+# ==================== 依赖分组（PDM） ====================
+
+[tool.pdm]
+distribution = false
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",      # 测试框架
+    "pytest-cov>=5.0.0",  # 测试覆盖率
+    "ruff>=0.4.0",        # 代码检查 + 格式化（统一工具）
+    "mypy>=1.9.0",        # 类型检查
+    "types-pyyaml>=6.0",  # PyYAML 类型存根
+    "black>=24.0.0",
+    "pre-commit>=3.0.0",
+    "typer>=0.9.0",
+    "requests>=2.0.0"
+]
+
+# ==================== Ruff 统一配置（替代 Black + Isort） ====================
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"  # 与 requires-python 保持一致
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "venv",
+    ".venv",
+    "*.egg-info",
+    "week1_practice",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort（导入排序）
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "PLC", # pylint 约定检查
+    "PLE", # pylint 错误
+    "PLW", # pylint 警告
+]
+ignore = [
+    "E501",  # 由格式化器处理
+    "B008",  # 函数调用默认参数（有争议）
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ==================== 删除 Black 和 Isort 配置（已被 Ruff 替代） ====================
+# [tool.black]  # 删除，用 Ruff 替代
+# [tool.isort]  # 删除，用 Ruff 替代
+
+# ==================== Mypy 配置 ====================
+
+[tool.mypy]
+python_version = "3.12" # 与目标版本一致
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+check_untyped_defs = true       # 新增：检查无类型函数
+disallow_any_unimported = true  # 新增：禁止未导入的 Any
+exclude = ["week1_practice"]
+
+# ==================== Pytest 配置 ====================
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = [  # 新增：默认测试选项
+    "-v",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+# ==================== 覆盖率配置 ====================
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "def __repr__",    # 新增：忽略 __repr__ 方法
+    "raise NotImplementedError",
+]
+fail_under = 80  # 新增：覆盖率低于 80% 时失败

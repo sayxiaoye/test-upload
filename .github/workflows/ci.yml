@@ -1,0 +1,42 @@
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest pytest-cov ruff black mypy
+
+      - name: 运行 ruff 检查
+        run: ruff check src/ tests/
+
+      - name: 运行 black 格式检查
+        run: black src/ tests/ --check
+
+      - name: 运行 mypy 类型检查
+        run: mypy src/
+
+      - name: 运行测试并生成覆盖率报告
+        run: pytest tests/ --cov=src --cov-report=term-missing
