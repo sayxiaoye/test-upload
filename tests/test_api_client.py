@@ -10,7 +10,7 @@ def test_fetch_post_success():
     mock_response.json.return_value = {"titles": "Mocked Title!!"}
 
     # 2. 用 patch 替换 requests.get
-    with patch("src.api_client.requests.get") as mock_get:
+    with patch("src.core.api_client.requests.get") as mock_get:
         mock_get.return_value = mock_response
 
         # 3. 调用被测函数
@@ -29,7 +29,7 @@ def test_fetch_post_failure():
     mock_response.json.return_value = {}
 
     # 2. 用 patch 替换 requests.get
-    with patch("src.api_client.requests.get") as mock_get:
+    with patch("src.core.api_client.requests.get") as mock_get:
         mock_get.return_value = mock_response
         # 3. 调用被测函数
         result = fetch_post(999)
