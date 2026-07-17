@@ -6,8 +6,11 @@ authors = [
     {name = "sayxiaoye", email = "sayxiaoye@outlook.com"},
 ]
 dependencies = [
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.0",
+    "typer>=0.9.0",
     "httpx>=0.28.1",
-    "pyyaml>=6.0",
     ]
 requires-python = ">=3.12"
 readme = "README.md"
@@ -27,8 +30,6 @@ dev = [
     "types-pyyaml>=6.0",  # PyYAML 类型存根
     "black>=24.0.0",
     "pre-commit>=3.0.0",
-    "typer>=0.9.0",
-    "requests>=2.0.0"
 ]
 
 # ==================== Ruff 统一配置（替代 Black + Isort） ====================
