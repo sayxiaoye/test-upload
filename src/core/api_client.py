@@ -1,3 +1,5 @@
+from typing import Any
+
 import requests
 
 # 认证请求头
@@ -54,7 +56,7 @@ def get_posts_by_user(user_id: int, limit: int = 10):
 def create_post(title: str, body: str, user_id: int = 1):
     """创建新文章"""
     url = "https://jsonplaceholder.typicode.com/posts"
-    payload = {"title": title, "body": body, "user_id": user_id}
+    payload: dict[str, Any] = {"title": title, "body": body, "user_id": user_id}
     response = requests.post(url, json=payload, timeout=10)
     response.raise_for_status()
     return response.json()
