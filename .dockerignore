@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+.gitignore
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+pdm.lock
+*.log
+data/
+week1_practice/
+.DS_Store
+*.md
+!README.md

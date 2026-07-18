@@ -312,8 +312,8 @@
 | B6 | 类型标注 | [x] | 2026-07-15 | typing、mypy、为公共函数补类型注解 |
 | B7 | 代码规范 | [x] | 2026-07-15 | ruff、black、pre-commit、命名和目录组织 |
 | B8 | CLI 工具开发 | [x] | 2026-07-16 | argparse 或 typer，命令行参数、退出码 |
-| B9 | 持续集成基础 | [ ] |  | GitHub Actions 跑测试、lint、type check |
-| B10 | 容器化基础 | [ ] |  | 为项目补最小 Dockerfile 和启动说明 |
+| B9 | 持续集成基础 | [x] | 2026-07-17 | GitHub Actions 跑测试、lint(代码检查ruff)、type check(类型检查mypy) |
+| B10 | 容器化基础 | [x] | 2026-07-18 | 为项目补最小 Dockerfile 和启动说明 |
 
 ### 阶段 B 验收标准
 - 能搭建一个规范 Python 项目并跑通 lint、format、test、type check
