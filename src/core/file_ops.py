@@ -9,7 +9,7 @@ if not path.exists():
 
 # 2. 写一个函数 save_note(filename, content)，把内容写入文件
 def save_note(filename: str, content: str) -> None:
-    with open(filename, "a", encoding="utf-8") as f:
+    with open(filename, "w", encoding="utf-8") as f:
         f.write(f"\n{content}")
 
 
@@ -25,7 +25,7 @@ def read_note(filename) -> str:
 # 4. 写一个函数 append_note(filename, content)，追加一行内容
 def append_note(filename, content):
     with open(filename, "a", encoding="utf-8") as f:
-        f.write(content)
+        f.write(f"\n{content}")
 
 
 # 5. 读取完整文件内容，按行打印（每行前面加行号）

@@ -11,6 +11,7 @@ CLI 入口： my-first-project命令工具
 import typer
 
 from src.core import (
+    append_note,
     fetch_post,
     file_exists,
     get_config,
@@ -63,6 +64,19 @@ def exists(filepath: str):
         typer.echo(f"✅ 文件存在: {filepath}")
     else:
         typer.echo(f"❌ 文件不存在: {filepath}")
+
+
+@app.command()
+def append(filepath: str, content: str):
+    """
+    追加内容到文件
+
+    Args:
+        filepath:文件路径
+        content: 写入的内容
+    """
+    append_note(filepath, content)
+    typer.echo(f"✅ 已保存到: {filepath}")
 
 
 @app.command()
