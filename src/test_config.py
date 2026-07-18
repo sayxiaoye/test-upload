@@ -1,4 +1,4 @@
-from src.core.config import get_config
+from src.core import get_config
 
 
 def main():

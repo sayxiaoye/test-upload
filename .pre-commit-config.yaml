@@ -10,10 +10,14 @@ repos:
       - id: check-merge-conflict
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.0
+    rev: v0.15.21
     hooks:
       - id: ruff
-        args: [--fix]
+        args: [
+          --fix,
+          --exit-non-zero-on-fix,
+          --config=pyproject.toml,  # 指定配置文件
+        ]
 
   - repo: https://github.com/psf/black
     rev: 24.4.0

@@ -14,7 +14,7 @@ def save_note(filename: str, content: str):
         sNote.write(content)
 
 
-save_note("data/note.txt", "这是第一行笔记\n第二行笔记")
+# save_note("data/note.txt", "这是第一行笔记\n第二行笔记")
 
 
 # 3. 写一个函数 read_note(filename)，读取文件并返回内容，如果文件不存在返回 "文件不存在"
@@ -37,7 +37,7 @@ def append_note(filename, content):
         f.write(content)
 
 
-append_note("data/note.txt", "\n这是追加的第三行")
+# append_note("data/note.txt", "\n这是追加的第三行")
 
 # 5. 读取完整文件内容，按行打印（每行前面加行号）
 # 预期输出：

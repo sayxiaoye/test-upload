@@ -10,9 +10,13 @@ CLI 入口： my-first-project命令工具
 
 import typer
 
-from src.core.api_client import fetch_post
-from src.core.config import get_config
-from src.core.file_ops import file_exists, read_note, save_note
+from src.core import (
+    fetch_post,
+    file_exists,
+    get_config,
+    read_note,
+    save_note,
+)
 
 # 创建 CLI 应用
 app = typer.Typer(
