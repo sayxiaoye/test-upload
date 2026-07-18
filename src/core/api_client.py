@@ -1,5 +1,3 @@
-from typing import cast
-
 import requests
 
 # 认证请求头
@@ -44,31 +42,31 @@ def fetch_post(post_id: int):
         return {}
 
 
-def get_posts_by_user(user_id: int, limit: int = 10) -> list[dict]:
+def get_posts_by_user(user_id: int, limit: int = 10):
     """获取指定用户的所有文章"""
     url = "https://jsonplaceholder.typicode.com/posts"
     params = {"userId": user_id, "_limit": limit}
     response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
-    return cast(list[dict], response.json())
+    return response.json()
 
 
-def create_post(title: str, body: str, user_id: int = 1) -> dict:
+def create_post(title: str, body: str, user_id: int = 1):
     """创建新文章"""
     url = "https://jsonplaceholder.typicode.com/posts"
     payload = {"title": title, "body": body, "user_id": user_id}
     response = requests.post(url, json=payload, timeout=10)
     response.raise_for_status()
-    return cast(dict, response.json())
+    return response.json()
 
 
 # PUT：更新资源
-def update_post(post_id: int, title: str, body: str) -> dict:
+def update_post(post_id: int, title: str, body: str):
     url = f"https://jsonplaceholder.typicode.com/posts/{post_id}"
     payload = {"title": title, "body": body}
     response = requests.put(url, json=payload)
     response.raise_for_status()
-    return cast(dict, response.json())
+    return response.json()
 
 
 # DELETE：删除资源
