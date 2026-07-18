@@ -10,7 +10,7 @@ if not path.exists():
 # 2. 写一个函数 save_note(filename, content)，把内容写入文件
 def save_note(filename: str, content: str) -> None:
     with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"\n{content}")
+        f.write(content)
 
 
 # 3. 写一个函数 read_note(filename)，读取文件并返回内容，如果文件不存在返回 "文件不存在"
