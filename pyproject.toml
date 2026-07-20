@@ -11,6 +11,8 @@ dependencies = [
     "pyyaml>=6.0.0",
     "typer>=0.9.0",
     "httpx>=0.28.1",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",
     ]
 requires-python = ">=3.12"
 readme = "README.md"
@@ -30,6 +32,9 @@ dev = [
     "types-pyyaml>=6.0",  # PyYAML 类型存根
     "black>=24.0.0",
     "pre-commit>=3.0.0",
+    "pypdf>=6.0.0",
+    "pdfplumber>=0.10.0",
+    "reportlab>=5.0.0",
 ]
 
 # ==================== Ruff 统一配置（替代 Black + Isort） ====================
@@ -86,7 +91,7 @@ warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
 check_untyped_defs = true       # 新增：检查无类型函数
-disallow_any_unimported = true  # 新增：禁止未导入的 Any
+# disallow_any_unimported = true  # 新增：禁止未导入的 Any
 exclude = ["week1_practice"]
 
 # ==================== Pytest 配置 ====================

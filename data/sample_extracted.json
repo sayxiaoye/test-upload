@@ -1,0 +1,35 @@
+{
+  "source": "data/sample.pdf",
+  "metadata": {
+    "title": "",
+    "author": "",
+    "creator": "anonymous",
+    "producer": "",
+    "pages": 2
+  },
+  "pages": [
+    {
+      "page": 1,
+      "text": "Test PDF\nThis is the content of page 1, used to test PDF extraction functionality.\nPage 1 also has more text to verify paginated extraction.",
+      "metadata": {
+        "title": "",
+        "author": "",
+        "creator": "anonymous",
+        "producer": "",
+        "pages": 2
+      }
+    },
+    {
+      "page": 2,
+      "text": "Page 2\nThis is the content of page 2.\nContains some sample text for testing multi-page extraction.\nAnd some additional content.",
+      "metadata": {
+        "title": "",
+        "author": "",
+        "creator": "anonymous",
+        "producer": "",
+        "pages": 2
+      }
+    }
+  ],
+  "total_pages": 2
+}

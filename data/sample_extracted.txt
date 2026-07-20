@@ -1,0 +1,8 @@
+Test PDF
+This is the content of page 1, used to test PDF extraction functionality.
+Page 1 also has more text to verify paginated extraction.
+
+Page 2
+This is the content of page 2.
+Contains some sample text for testing multi-page extraction.
+And some additional content.
