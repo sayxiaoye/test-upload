@@ -35,6 +35,8 @@ dev = [
     "pypdf>=6.0.0",
     "pdfplumber>=0.10.0",
     "reportlab>=5.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
 ]
 
 # ==================== Ruff 统一配置（替代 Black + Isort） ====================
@@ -71,6 +73,7 @@ select = [
 ignore = [
     "E501",  # 由格式化器处理
     "B008",  # 函数调用默认参数（有争议）
+    "N815",  # 要求类作用域中的变量使用 snake_case（蛇形命名法），而不是 mixedCase（混合大小写）
 ]
 
 [tool.ruff.format]
