@@ -37,6 +37,7 @@ dev = [
     "reportlab>=5.0.0",
     "fastapi>=0.100.0",
     "uvicorn>=0.23.0",
+    "sqlalchemy>=2.0.0",
 ]
 
 # ==================== Ruff 统一配置（替代 Black + Isort） ====================
