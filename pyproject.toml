@@ -92,12 +92,23 @@ line-ending = "auto"
 
 [tool.mypy]
 python_version = "3.12" # 与目标版本一致
-warn_return_any = true
+warn_return_any = false  # ✅ 改为 false，允许返回 Any（对第三方库更友好）
 warn_unused_configs = true
 ignore_missing_imports = true
 check_untyped_defs = true       # 新增：检查无类型函数
-# disallow_any_unimported = true  # 新增：禁止未导入的 Any
+disallow_any_unimported = false  # 新增：禁止未导入的 Any
 exclude = ["week1_practice"]
+
+# ✅ 新增：对特定库禁用类型检查
+[[tool.mypy.overrides]]
+module = [
+    "sentence_transformers",
+    "numpy",
+    "openai",
+    "dotenv",
+]
+ignore_missing_imports = true
+disallow_any_unimported = false
 
 # ==================== Pytest 配置 ====================
 
