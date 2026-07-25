@@ -3,13 +3,14 @@ Embedding 演示
 使用 sentence-transformers 生成向量 并计算相似度
 """
 
+import glob
 import os
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
 # ✅ 设置 Hugging Face 缓存目录（指向你的本地模型目录）
-# os.environ["HF_HOME"] = "D:/AI_Models/huggingface"
+os.environ["HF_HOME"] = "D:/AI_Models/huggingface"
 # 如果需要镜像（下载时用）
 # os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 os.environ["HF_HUB_OFFLINE"] = "1"
@@ -20,17 +21,30 @@ class EmbeddingClient:
 
     def __init__(
         self,
-        model_name: str = "D:/AI_Models/huggingface/hub/models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/snapshots/e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+        # model_name: str = "D:/AI_Models/huggingface/hub/models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/snapshots/e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+        model_name: str = "BAAI/bge-m3",  # ✅ 使用字符串，不直接加载
     ):
         """
         初始化 Embedding 模型
 
         Args:
-            model_name: 模型名称， 默认是多语言轻量级模型
+            model_name: 模型名称，默认使用 BAAI/bge-m3
             可选：'all-MiniLM-L6-v2' (英文), 'paraphrase-multilingual-MiniLM-L12-v2' (多语言)
         """
-        self.model = SentenceTransformer(model_name)
+        # base_path = "D:/AI_Models/huggingface/hub/models--BAAI--bge-m3/snapshots/"
+        base_path = "D:/AI_Models/huggingface/hub/models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/snapshots/"
+
+        # 自动查找第一个快照目录
+        snapshot_dirs = glob.glob(os.path.join(base_path, "*"))
+        if not snapshot_dirs:
+            raise FileNotFoundError(f"在 {base_path} 下未找到模型快照。")
+
+        self.model_path = snapshot_dirs[0]  # 使用第一个找到的快照
+        print(f"📂 自动找到本地模型: {self.model_path}")
+
+        self.model = SentenceTransformer(self.model_path)
         self.dimension = self.model.get_embedding_dimension()
+        print(f"✅ 模型加载成功！向量维度: {self.dimension}")
 
     def encode(self, texts: list[str]) -> np.ndarray:
         """将文本转换为向量"""
