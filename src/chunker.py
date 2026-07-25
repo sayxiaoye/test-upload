@@ -150,13 +150,13 @@ class TextChunker:
 
 def print_chunks(chunks: list[str], title: str = "切割结果"):
     """打印切分结果"""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"📌 {title}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"共 {len(chunks)} 个 chunk\n")
 
     for i, chunk in enumerate(chunks):
-        print(f"Chunk {i+1} (长度: {len(chunk)} 字符):")
+        print(f"Chunk {i + 1} (长度: {len(chunk)} 字符):")
         print(f"  {chunk[:100]}{'...' if len(chunk) > 100 else ''}")
         print()
 

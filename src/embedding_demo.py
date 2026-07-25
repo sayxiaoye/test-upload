@@ -126,4 +126,4 @@ if __name__ == "__main__":
     print("\n🔍 搜索结果（按相关度排序）:")
     for i, idx in enumerate(sorted_indices):
         label = get_similarity_label(similarities[idx])
-        print(f"  {i+1}. {documents[idx]} (相似度: {similarities[idx]:.4f}({label}))")
+        print(f"  {i + 1}. {documents[idx]} (相似度: {similarities[idx]:.4f}({label}))")

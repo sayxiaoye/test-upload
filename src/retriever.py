@@ -96,5 +96,5 @@ if __name__ == "__main__":
         results = retriever.retrieve(query, top_k=3)
         for i, (chunk, score) in enumerate(results):
             label = get_similarity_label(score)
-            print(f"  结果 {i+1} (相似度: {score:.4f}) [{label}]:")
+            print(f"  结果 {i + 1} (相似度: {score:.4f}) [{label}]:")
             print(f"    {chunk[:80]}...")

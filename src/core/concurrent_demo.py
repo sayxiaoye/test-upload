@@ -75,7 +75,7 @@ def generate_sample_pdfs():
             c.drawString(100, 800, f"Wold {i}")
             c.setFont("Helvetica", 14)
             c.drawString(100, 750, f"This is the {i} XXX PDF ")
-            c.drawString(100, 720, f"Include {i+1} Text。")
+            c.drawString(100, 720, f"Include {i + 1} Text。")
             c.showPage()
             c.save()
             print(f"✅ 创建: {pdf_path}")

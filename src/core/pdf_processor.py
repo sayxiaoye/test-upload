@@ -22,7 +22,6 @@ def extract_text_from_pdf(pdf_path: str) -> list[dict]:
     # reader = PdfReader(pdf_path)
     result: list = []
     with pdfplumber.open(pdf_path) as pdf:
-
         # 提取元数据
         metadata = pdf.metadata
         if metadata:

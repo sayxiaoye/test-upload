@@ -23,7 +23,7 @@ class LLMClient:
             api_key=os.getenv("DEEPSEEK_API_KEY"),
             base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
         )
-        self.default_model = "deepseek-chat"
+        self.default_model = os.getenv("DEEPSEEK_MODEL_FLASH", "deepseek-v4-flash")
 
     def _validate_messages(self, messages: list[dict[str, str]]) -> None:
         """
