@@ -93,6 +93,6 @@ if __name__ == "__main__":
     print("🔍 Cross-Encoder 重排结果:")
     for i, (doc, score) in enumerate(results):
         label = get_similarity_label(score)
-        print(f"  {i+1}. (分数: {score:.4f}) [{label}]")
+        print(f"  {i + 1}. (分数: {score:.4f}) [{label}]")
         print(f"     {doc}")
         print()

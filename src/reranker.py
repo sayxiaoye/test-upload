@@ -130,14 +130,14 @@ def compare_retrieval_vs_rerank():
     candidates = retriever.retrieve(query, top_k=5)
     print("【粗排 - Embedding 召回】")
     for i, (chunk, score) in enumerate(candidates):
-        print(f"  {i+1}. (相似度: {score:.4f}) {chunk[:50]}...")
+        print(f"  {i + 1}. (相似度: {score:.4f}) {chunk[:50]}...")
 
     # 3. 重排
     reranker = SimpleReranker()
     reranked = reranker.rerank(query, candidates, top_k=3)
     print("\n【精排 - Rerank 重排】")
     for i, (chunk, score) in enumerate(reranked):
-        print(f"  {i+1}. (重排分: {score}) {chunk[:50]}...")
+        print(f"  {i + 1}. (重排分: {score}) {chunk[:50]}...")
 
 
 if __name__ == "__main__":
