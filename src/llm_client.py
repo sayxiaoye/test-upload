@@ -16,7 +16,7 @@ class LLMClient:
     """大模型客户端"""
 
     # 允许的角色类型
-    VALID_ROLES = {"system", "user", "assistant"}
+    VALID_ROLES = {"system", "user", "assistant", "tool"}
 
     def __init__(self):
         self.client = OpenAI(
