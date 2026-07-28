@@ -165,6 +165,117 @@ class Agent:
         return answer
 
 
+# ReAct = Reasoning + Acting（推理 + 行动）
+class ReActAgent:
+    """支持多步推理的(ReAct) 的 Agent"""
+
+    def __init__(self):
+        self.llm = LLMClient()
+        self.tools = TOOLS
+        self.function_map: dict[str, Callable[..., str]] = FUNCTION_MAP
+        # ReAct的系统提示词，引导模型进行“思考-行动-观察”循环
+        self.system_prompt = """你是一个能使用工具的智能助手。请严格按照以下格式进行推理和行动：
+
+问题: 用户的问题
+思考: 你需要思考下一步该做什么，是否需要使用工具。
+行动: 如果需要使用工具，请输出: 行动: 工具名称({"参数名": "参数值"})
+观察: 系统会返回工具执行的结果。
+... (你可以重复“思考-行动-观察”多次) ...
+思考: 我现在知道最终答案了。
+关键字【最终回答:】后面加上，你的最终回答
+
+注意:
+- 关键字【最终回答:】只出现在最后一步。
+- 如果你不需要使用工具，可以直接给出“最终回答”。
+"""
+
+    def chat(self, user_input: str, max_steps: int = 5) -> str:
+        """
+        执行ReAct的工作流
+        """
+        # 初始化消息史
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": user_input},
+        ]
+        observations = []
+        final_answer = "抱歉，我无法完成这个任务"
+
+        for step in range(max_steps):
+            # 1 推理reasoning: 调用LLM获取下一步思考
+            response = self.llm.client.chat.completions.create(
+                model=os.getenv("DEEPSEEK_MODEL_FLASH", "deepseek-chat"),
+                messages=messages,  # type: ignore
+                temperature=0.3,
+            )
+            thought = response.choices[0].message.content or ""
+
+            # 2 判断是否已完成，如果LLM输出包含“最终完成”，则提取并结束循环
+            if "最终回答" in thought:
+                # 找到“最终回答:”后面的内容
+                parts = thought.split("最终回答:")
+                final_answer = parts[-1].strip() if len(parts) > 1 else thought
+                break
+
+            # 3. 行动acting：解析并执行工具
+            action = self._parse_action(thought)
+            if action:
+                tool_name, tool_args = action
+                print(f"🔧 ReAct 步骤 {step + 1}: 调用工具 {tool_name}({tool_args})")
+                result = self._execute_tool(tool_name, tool_args)
+                observation = f"观察: {result}"
+            else:
+                # 如果LLM没有输出有效的“Acting”， 则手动生成一个“observation”，让对话继续
+                observation = "观察：无法解析行动，请重新思考并输出正确的行动。"
+
+            # 将reasoning acting observation追加到消息历史，供下一步推理使用
+            messages.append({"role": "assistant", "content": thought})
+            messages.append({"role": "user", "content": observation})
+            observations.append(observation)
+
+        # 4. 生成最终回答
+        return final_answer
+
+    def _parse_action(self, thought: str) -> tuple[str, dict] | None:
+        """
+        从 LLM 的输出中解析出工具名称和参数
+        期望的格式： 行动: 工具名称（参数）
+        例如： 行动: get_weather({"city": "北京"})
+        """
+        if "行动:" not in thought:
+            return None
+
+        # 提取acting之后的部分
+        action_line = thought.rsplit("行动:", maxsplit=1)[-1].strip()
+        # 寻找括号来分割工具名和参数
+        if "(" not in action_line or ")" not in action_line:
+            return None
+
+        tool_name = action_line.split("(")[0].strip()
+        args_str = action_line.split("(")[1].split(")")[0].strip()
+
+        try:
+            # 尝试将参数解析为JSON
+            tool_args = json.loads(args_str)
+        except json.JSONDecodeError:
+            # 如果解析失败，可能是参数格式不标准，尝试构建一个空字典或返回 None
+            print(f"⚠️ 参数解析失败: {args_str}")
+            return None
+
+        return tool_name, tool_args
+
+    def _execute_tool(self, tool_name: str, tool_args: dict) -> str:
+        """执行具体的工具 函数"""
+        func = self.function_map.get(tool_name)
+        if func:
+            try:
+                return func(**tool_args)
+            except Exception as e:
+                return f"❌ 工具执行错误: {e}"
+        else:
+            return f"❌ 未知工具: {tool_name}"
+
+
 if __name__ == "__main__":
     agent = Agent()
 
@@ -180,8 +291,18 @@ if __name__ == "__main__":
     print("🤖 Agent 智能体演示")
     print("=" * 60)
 
-    for query in test_inputs:
-        print(f"\n📌 用户: {query}")
-        response = agent.chat(query)
-        print(f"🤖 Agent: {response}")
-        print("-" * 40)
+    # for query in test_inputs:
+    #     print(f"\n📌 用户: {query}")
+    #     response = agent.chat(query)
+    #     print(f"🤖 Agent: {response}")
+    #     print("-" * 40)
+
+    print("\n" + "=" * 60)
+    print("🧠 ReAct Agent 多步推理演示")
+    print("=" * 60)
+
+    react_agent = ReActAgent()
+    complex_query = "北京今天天气怎么样？"
+    print(f"\n📌 用户: {complex_query}")
+    response = react_agent.chat(complex_query)
+    print(f"🧠 ReAct Agent: {response}")
