@@ -34,3 +34,6 @@ Thumbs.db
 # Project specific
 .pdm-python
 pdm.lock
+
+logs/
+.coverage
