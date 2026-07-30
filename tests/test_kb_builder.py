@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.kb_builder import build_index_records, query_index, save_jsonl
+from src.tools.kb_builder import build_index_records, query_index, save_jsonl
 
 
 def test_build_index_records_from_directory_with_pdf_and_txt(
@@ -93,7 +93,7 @@ def test_query_index_returns_top_k(monkeypatch, tmp_path: Path):
                 return [[1.0, 0.0]]
             return [[1.0, 0.0], [0.0, 1.0]]
 
-    monkeypatch.setattr("src.kb_builder.EmbeddingClient", FakeEmbeddingClient)
+    monkeypatch.setattr("src.tools.kb_builder.EmbeddingClient", FakeEmbeddingClient)
 
     result = query_index(str(index_file), "苹果", top_k=1)
     assert len(result) == 1
