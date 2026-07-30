@@ -14,7 +14,7 @@ def test_build_index_records_from_directory_with_pdf_and_txt(
     (docs_dir / "c.pdf").write_bytes(b"fake")
 
     monkeypatch.setattr(
-        "src.kb_builder.extract_text_from_pdf",
+        "src.tools.kb_builder.extract_text_from_pdf",
         lambda _: [{"page": 1, "text": "桃子。西瓜。", "metadata": {}}],
     )
 

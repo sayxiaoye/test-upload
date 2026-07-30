@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from src.core.pdf_processor import extract_full_text
-from src.rag_pipeline import RAGPipeline
+from src.rag.pipeline import RAGPipeline
 
 DEFAULT_DOCUMENT = """
 Python 是一种通用编程语言，适合脚本、自动化、数据分析和 AI 应用开发。

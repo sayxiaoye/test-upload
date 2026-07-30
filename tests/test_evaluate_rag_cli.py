@@ -1,6 +1,6 @@
 import json
 
-from src.evaluate_rag import analyze_results, generate_logs
+from src.eval.evaluate_rag import analyze_results, generate_logs
 
 
 class FakePipeline:
@@ -20,7 +20,7 @@ class FakePipeline:
 
 
 def test_generate_logs_writes_json_files(tmp_path, monkeypatch):
-    monkeypatch.setattr("src.evaluate_rag.RAGPipeline", FakePipeline)
+    monkeypatch.setattr("src.eval.evaluate_rag.RAGPipeline", FakePipeline)
 
     result = generate_logs(
         log_dir=str(tmp_path / "rag_eval"),

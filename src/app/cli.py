@@ -2,10 +2,10 @@
 CLI 入口： my-first-project命令工具
 
 用法：
-    python -m src.cli --help
-    python -m src.cli --read data/note.txt
-    python -m src.cli --save data/note.txt "Hello, CLI!"
-    python -m src.cli --fetch 1
+    python -m src.app.cli --help
+    python -m src.app.cli --read data/note.txt
+    python -m src.app.cli --save data/note.txt "Hello, CLI!"
+    python -m src.app.cli --fetch 1
 """
 
 import typer

@@ -10,8 +10,7 @@ from pathlib import PurePath
 
 from sentence_transformers import CrossEncoder
 
-from src.llm_client import LLMClient
-from src.retriever import Retriever
+from src.rag.llm_client import LLMClient
 
 DEFAULT_CROSS_ENCODER_MODEL = (
     r"D:/AI_Models/huggingface/hub/"
@@ -35,7 +34,7 @@ class SimpleReranker:
     """
 
     def __init__(self):
-        print("=" * 20 + " SimpleReranker " + "=" * 20)
+        print(f"{'=' * 20} SimpleReranker {'=' * 20}")
 
         self.llm = LLMClient()
 
@@ -122,7 +121,7 @@ class CrossEncoderReranker:
     """基于 Cross-Encoder 的精排器。"""
 
     def __init__(self, model_name: str = DEFAULT_CROSS_ENCODER_MODEL):
-        print("=" * 20 + " CrossEncoderReranker " + "=" * 20)
+        print(f"{'=' * 20} CrossEncoderReranker {'=' * 20}")
 
         self.model = CrossEncoder(model_name)
         print(f"📂 找到本地模型: {get_model_display_name(model_name)}")
@@ -154,7 +153,7 @@ class Reranker:
     """正式重排器，优先使用 Cross-Encoder，失败时回退到简单实现。"""
 
     def __init__(self, model_name: str = DEFAULT_CROSS_ENCODER_MODEL):
-        print("=" * 20 + " Reranker " + "=" * 20)
+        print(f"{'=' * 20} Reranker {'=' * 20}")
 
         self.backend: SimpleReranker | CrossEncoderReranker
 
@@ -173,49 +172,3 @@ class Reranker:
         top_k: int = 3,
     ) -> list[tuple[str, float]]:
         return self.backend.rerank(query, candidates, top_k=top_k)
-
-
-def compare_retrieval_vs_rerank():
-    """对比检索和重排的效果"""
-    test_doc = """
-    机器学习是人工智能的一个分支，它让计算机能够从数据中学习。
-    传统的编程方式需要程序员明确写出规则，而机器学习则通过算法自动发现数据中的模式。
-
-    深度学习是机器学习的一个子集，它使用多层神经网络来学习数据的表示。
-    深度学习的核心是神经网络，它由多个层组成，每一层都从前一层学习特征。
-
-    大语言模型是基于深度学习的自然语言处理模型，它们能够理解和生成人类语言。
-    GPT、Claude、DeepSeek 等都是大语言模型的代表。
-    这些模型通过在海量文本数据上训练，获得了强大的语言理解和生成能力。
-
-    RAG（检索增强生成）是一种结合检索和生成的技术。
-    它先从知识库中检索相关信息，然后让大语言模型基于这些信息生成回答。
-    RAG 能够显著提高回答的准确性和可解释性。
-    """
-
-    # 1. 检索
-    retriever = Retriever()
-    retriever.index_document(test_doc)
-
-    query = "机器学习与深度学习的关系是什么？"
-    print("=" * 60)
-    print("🔍 检索 vs 重排 对比")
-    print("=" * 60)
-    print(f"\n📌 查询: {query}\n")
-
-    # 2. 召回 top-5
-    candidates = retriever.retrieve(query, top_k=5)
-    print("【粗排 - Embedding 召回】")
-    for i, (chunk, score) in enumerate(candidates):
-        print(f"  {i + 1}. (相似度: {score:.4f}) {chunk[:50]}...")
-
-    # 3. 重排
-    reranker = Reranker()
-    reranked = reranker.rerank(query, candidates, top_k=3)
-    print("\n【精排 - Rerank 重排】")
-    for i, (chunk, score) in enumerate(reranked):
-        print(f"  {i + 1}. (重排分: {score}) {chunk[:50]}...")
-
-
-if __name__ == "__main__":
-    compare_retrieval_vs_rerank()

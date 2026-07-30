@@ -1,4 +1,4 @@
-from src.rag_cli import build_parser
+from src.app.rag_cli import build_parser
 
 
 def test_build_parser_supports_separate_retrieve_and_rerank_limits():
