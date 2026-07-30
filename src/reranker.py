@@ -8,14 +8,10 @@ import json
 import math
 from pathlib import PurePath
 
+from sentence_transformers import CrossEncoder
+
 from src.llm_client import LLMClient
 from src.retriever import Retriever
-
-try:
-    from sentence_transformers import CrossEncoder
-except ImportError:
-    CrossEncoder = None
-
 
 DEFAULT_CROSS_ENCODER_MODEL = (
     r"D:/AI_Models/huggingface/hub/"
@@ -127,11 +123,6 @@ class CrossEncoderReranker:
 
     def __init__(self, model_name: str = DEFAULT_CROSS_ENCODER_MODEL):
         print("=" * 20 + " CrossEncoderReranker " + "=" * 20)
-
-        if CrossEncoder is None:
-            raise RuntimeError(
-                "sentence-transformers 未安装，无法启用 Cross-Encoder 精排"
-            )
 
         self.model = CrossEncoder(model_name)
         print(f"📂 找到本地模型: {get_model_display_name(model_name)}")
