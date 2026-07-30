@@ -5,6 +5,7 @@ Embedding 演示
 
 import glob
 import os
+from pathlib import PurePath
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -15,6 +16,20 @@ os.environ["HF_HOME"] = "D:/AI_Models/huggingface"
 # os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 os.environ["HF_HUB_OFFLINE"] = "1"
 
+DEFAULT_EMBEDDING_MODEL = (
+    r"D:/AI_Models/huggingface/hub/"
+    r"models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/"
+    r"snapshots/e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
+)
+
+
+def get_model_display_name(model_name: str) -> str:
+    """从模型路径中提取适合终端显示的目录名。"""
+    for part in PurePath(model_name).parts:
+        if part.startswith("models--"):
+            return part
+    return PurePath(model_name).name or model_name
+
 
 class EmbeddingClient:
     """Embedding 客户端"""
@@ -22,8 +37,10 @@ class EmbeddingClient:
     def __init__(
         self,
         # model_name: str = "D:/AI_Models/huggingface/hub/models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/snapshots/e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
-        model_name: str = "BAAI/bge-m3",  # ✅ 使用字符串，不直接加载
+        model_name: str = DEFAULT_EMBEDDING_MODEL,
     ):
+        print("=" * 20 + " EmbeddingClient " + "=" * 20)
+
         """
         初始化 Embedding 模型
 
@@ -40,11 +57,16 @@ class EmbeddingClient:
             raise FileNotFoundError(f"在 {base_path} 下未找到模型快照。")
 
         self.model_path = snapshot_dirs[0]  # 使用第一个找到的快照
-        print(f"📂 自动找到本地模型: {self.model_path}")
+        if self.model_path == model_name:
+            r"""
+            D:/AI_Models/huggingface/hub/models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/snapshots\e8f8c211226b894fcb81acc59f3b34ba3efd5f42
+            D:/AI_Models/huggingface/hub/models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/snapshots/e8f8c211226b894fcb81acc59f3b34ba3efd5f42
+            """
 
-        self.model = SentenceTransformer(self.model_path)
+        self.model = SentenceTransformer(model_name)
+        print(f"📂 找到本地模型: {get_model_display_name(model_name)}")
         self.dimension = self.model.get_embedding_dimension()
-        print(f"✅ 模型加载成功！向量维度: {self.dimension}")
+        print(f"✅ Embedding模型加载成功！向量维度: {self.dimension}")
 
     def encode(self, texts: list[str]) -> np.ndarray:
         """将文本转换为向量"""
@@ -73,8 +95,6 @@ def get_similarity_label(score: float) -> str:
 if __name__ == "__main__":
     # 初始化
     client = EmbeddingClient()
-    print(f"✅ 模型加载成功！向量维度: {client.dimension}")
-    print()
 
     # ============ 示例 1：相似度计算 ============
     print("=" * 60)

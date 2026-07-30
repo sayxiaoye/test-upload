@@ -4,7 +4,7 @@ RAG 完整流程
 """
 
 from src.llm_client import LLMClient
-from src.reranker import SimpleReranker
+from src.reranker import Reranker
 from src.retriever import Retriever
 
 
@@ -12,13 +12,73 @@ class RAGPipeline:
     """RAG 完整流程"""
 
     def __init__(self):
+        print("=" * 20 + " RAG Pipeline " + "=" * 20)
+
         self.retriever = Retriever()
-        self.reranker = SimpleReranker()
+        self.reranker = Reranker()
         self.llm = LLMClient()
 
     def index_document(self, text: str) -> None:
         """检索文档"""
         self.retriever.index_document(text)
+
+    def _build_source_prompt(
+        self,
+        question: str,
+        chunk: str,
+        source_index: int,
+        source_count: int,
+    ) -> str:
+        """为单条参考片段构造回答提示词。"""
+        return f"""
+            你是一个智能助手，请只根据这一条参考文档回答用户问题。
+
+            参考文档[{source_index}/{source_count}]：
+            {chunk}
+
+            用户问题：{question}
+
+            要求：
+            - 只输出这一条参考文档对应的一个结论
+            - 只输出一行
+            - 不要写多个条目，不要扩写到其他参考文档
+            - 回答要简洁、准确
+            """
+
+    @staticmethod
+    def _normalize_answer_line(answer: str) -> str:
+        """把模型输出压缩成单行答案，避免出现额外分行。"""
+        for line in answer.splitlines():
+            cleaned = line.strip()
+            if cleaned:
+                return cleaned
+        return ""
+
+    def _generate_answer_from_sources(
+        self,
+        question: str,
+        sources: list[dict[str, object]],
+    ) -> str:
+        """逐条参考文档生成答案，确保输出条数和参考片段数一致。"""
+        answers: list[str] = []
+        source_count = len(sources)
+
+        for index, source in enumerate(sources, start=1):
+            chunk = str(source.get("content", ""))
+            prompt = self._build_source_prompt(question, chunk, index, source_count)
+            raw_answer = self.llm.chat(
+                [{"role": "user", "content": prompt}],
+                temperature=0.2,
+                max_tokens=200,
+            )
+            normalized = self._normalize_answer_line(raw_answer)
+            if normalized:
+                answers.append(f"{index}. {normalized}")
+
+        if not answers:
+            return "知识库中国未找到相关信息"
+
+        return "\n".join(answers)
 
     def query(
         self,
@@ -66,22 +126,8 @@ class RAGPipeline:
 
         context = "\n\n".join(context_parts)
 
-        # Step 4: 构建 Prompt
-        prompt = f"""
-你是一个智能助手，请根据以下参考文档回答用户的问题。
-
-参考文档：
-{context}
-
-用户问题：{question}
-
-请基于上述参考文档回答，如果文档中没有相关信息，请明确告知。
-回答要简洁、准确。
-"""
-
-        # Step 5: 调用 LLM 生成
-        messages = [{"role": "user", "content": prompt}]
-        answer = self.llm.chat(messages, temperature=0.3)
+        # Step 4: 逐条生成答案，保证输出条数与参考片段数一致
+        answer = self._generate_answer_from_sources(question, sources)
 
         return {
             "question": question,

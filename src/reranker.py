@@ -5,9 +5,31 @@
 """
 
 import json
+import math
+from pathlib import PurePath
 
 from src.llm_client import LLMClient
 from src.retriever import Retriever
+
+try:
+    from sentence_transformers import CrossEncoder
+except ImportError:
+    CrossEncoder = None
+
+
+DEFAULT_CROSS_ENCODER_MODEL = (
+    r"D:/AI_Models/huggingface/hub/"
+    r"models--BAAI--bge-reranker-v2-m3/"
+    r"snapshots/953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e"
+)
+
+
+def get_model_display_name(model_name: str) -> str:
+    """从模型路径中提取适合终端显示的目录名。"""
+    for part in PurePath(model_name).parts:
+        if part.startswith("models--"):
+            return part
+    return PurePath(model_name).name or model_name
 
 
 class SimpleReranker:
@@ -17,6 +39,8 @@ class SimpleReranker:
     """
 
     def __init__(self):
+        print("=" * 20 + " SimpleReranker " + "=" * 20)
+
         self.llm = LLMClient()
 
     def rerank(
@@ -48,28 +72,28 @@ class SimpleReranker:
             {
                 "role": "system",
                 "content": """
-你是一个相关性评估专家。根据用户查询，对以下文档进行相关性评分（0-10分）。
+                        你是一个相关性评估专家。根据用户查询，对以下文档进行相关性评分（0-10分）。
 
-评分标准：
-- 10分：完全回答了查询的核心问题
-- 7-9分：回答了一部分，但不够完整
-- 4-6分：相关但不直接
-- 0-3分：不相关或无关
+                        评分标准：
+                        - 10分：完全回答了查询的核心问题
+                        - 7-9分：回答了一部分，但不够完整
+                        - 4-6分：相关但不直接
+                        - 0-3分：不相关或无关
 
-输出格式（JSON）：
-{"scores": [{"doc_id": 1, "score": 9, "reason": "..."}, ...]}
-""",
+                        输出格式（JSON）：
+                        {"scores": [{"doc_id": 1, "score": 9, "reason": "..."}, ...]}
+                        """,
             },
             {
                 "role": "user",
                 "content": f"""
-用户查询: {query}
+                        用户查询: {query}
 
-文档列表:
-{docs_text}
+                        文档列表:
+                        {docs_text}
 
-请对每个文档打分，并说明理由。
-""",
+                        请对每个文档打分，并说明理由。
+                        """,
             },
         ]
 
@@ -96,6 +120,68 @@ class SimpleReranker:
 
         # 降级：按原顺序返回
         return candidates[:top_k]
+
+
+class CrossEncoderReranker:
+    """基于 Cross-Encoder 的精排器。"""
+
+    def __init__(self, model_name: str = DEFAULT_CROSS_ENCODER_MODEL):
+        print("=" * 20 + " CrossEncoderReranker " + "=" * 20)
+
+        if CrossEncoder is None:
+            raise RuntimeError(
+                "sentence-transformers 未安装，无法启用 Cross-Encoder 精排"
+            )
+
+        self.model = CrossEncoder(model_name)
+        print(f"📂 找到本地模型: {get_model_display_name(model_name)}")
+
+    @staticmethod
+    def _sigmoid(score: float) -> float:
+        return 1.0 / (1.0 + math.exp(-score))
+
+    def rerank(
+        self,
+        query: str,
+        candidates: list[tuple[str, float]],
+        top_k: int = 3,
+    ) -> list[tuple[str, float]]:
+        if not candidates:
+            return []
+
+        pairs = [[query, chunk] for chunk, _ in candidates]
+        raw_scores = self.model.predict(pairs)
+        reranked = [
+            (chunk, self._sigmoid(float(score)))
+            for (chunk, _), score in zip(candidates, raw_scores, strict=False)
+        ]
+        reranked.sort(key=lambda item: item[1], reverse=True)
+        return reranked[:top_k]
+
+
+class Reranker:
+    """正式重排器，优先使用 Cross-Encoder，失败时回退到简单实现。"""
+
+    def __init__(self, model_name: str = DEFAULT_CROSS_ENCODER_MODEL):
+        print("=" * 20 + " Reranker " + "=" * 20)
+
+        self.backend: SimpleReranker | CrossEncoderReranker
+
+        try:
+            self.backend = CrossEncoderReranker(model_name=model_name)
+            self.backend_name = "cross-encoder"
+        except Exception as exc:
+            print(f"⚠️ Cross-Encoder 不可用，回退到 SimpleReranker: {exc}")
+            self.backend = SimpleReranker()
+            self.backend_name = "simple"
+
+    def rerank(
+        self,
+        query: str,
+        candidates: list[tuple[str, float]],
+        top_k: int = 3,
+    ) -> list[tuple[str, float]]:
+        return self.backend.rerank(query, candidates, top_k=top_k)
 
 
 def compare_retrieval_vs_rerank():
@@ -133,7 +219,7 @@ def compare_retrieval_vs_rerank():
         print(f"  {i + 1}. (相似度: {score:.4f}) {chunk[:50]}...")
 
     # 3. 重排
-    reranker = SimpleReranker()
+    reranker = Reranker()
     reranked = reranker.rerank(query, candidates, top_k=3)
     print("\n【精排 - Rerank 重排】")
     for i, (chunk, score) in enumerate(reranked):

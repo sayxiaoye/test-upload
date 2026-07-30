@@ -37,3 +37,5 @@ pdm.lock
 
 logs/
 .coverage
+
+data/jp

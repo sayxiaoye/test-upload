@@ -3,55 +3,7 @@ Cross-Encoder 演示
 使用 Hugging Face 交叉编码器进行精排
 """
 
-import numpy as np
-from sentence_transformers import CrossEncoder
-
-
-class CrossEncoderReranker:
-    """交叉编码器 重排器"""
-
-    def __init__(
-        self,
-        model_name: str = r"D:/AI_Models/huggingface/hub/models--BAAI--bge-reranker-v2-m3/snapshots/953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
-    ):
-        """
-        初始化交叉编码器
-
-        Args:
-            model_name: 模型名称
-        """
-        self.model = CrossEncoder(model_name)
-
-    def reranker(
-        self,
-        query: str,
-        documents: list[str],
-        top_k: int = 3,
-    ) -> list[tuple[str, float]]:
-        """
-        对文档进行重排
-
-        Args:
-            query: 查询文本
-            documents: 文档列表
-            top_k: 返回数量
-
-        Returns:
-            重排后的 [(文档, 分数), ...]
-        """
-        # 构造 Query-Document 对儿
-        pairs = [[query, doc] for doc in documents]
-
-        # 用 Cross-Encoder 预测原始分数（logit）
-        scores = self.model.predict(pairs)
-        # ✅ 关键：将 logit 转换为概率（0-1 之间）
-        scores = 1 / (1 + np.exp(-scores))
-
-        # 组合并排序
-        results = list(zip(documents, scores, strict=False))
-        results.sort(key=lambda x: x[1], reverse=True)
-
-        return results[:top_k]
+from src.reranker import CrossEncoderReranker
 
 
 # 在类外部定义（顶级函数）
@@ -88,7 +40,8 @@ if __name__ == "__main__":
 
     # 用 Cross-Encoder 重排
     reranker = CrossEncoderReranker()
-    results = reranker.reranker(query, documents, top_k=3)
+    candidates = [(doc, 0.0) for doc in documents]
+    results = reranker.rerank(query, candidates, top_k=3)
 
     print("🔍 Cross-Encoder 重排结果:")
     for i, (doc, score) in enumerate(results):

@@ -6,13 +6,15 @@
 import numpy as np  # 用于数组排序和数值计算
 
 from src.chunker import TextChunker  # 文本切分器，把长文档切割成小块
-from src.embedding_demo import EmbeddingClient  # 向量化客户端，把文本变成向量
+from src.embedding import EmbeddingClient  # 向量化客户端，把文本变成向量
 
 
 class Retriever:
     """检索器"""
 
     def __init__(self, chunker: TextChunker | None = None):
+        print("=" * 20 + " Retriever " + "=" * 20)
+
         self.chunker = chunker or TextChunker(chunk_size=200)  # 文本切分器
         self.embedding_client = EmbeddingClient()
         self.chunks: list[str] = []  # 存储切分后的文本块列表
