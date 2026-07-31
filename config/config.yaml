@@ -15,7 +15,14 @@ logging:
 
 models:
   default: "gpt-3.5-turbo"
+  default_alias: "fast"  # 默认使用的模型别名
+  aliases:  # 别名 → 实际模型名映射
+    fast: "deepseek-v4-flash"
+    pro: "deepseek-v4-pro"
   embedding: "text-embedding-3-small"
+  generation:  # 生成参数默认值
+    temperature: 0.7
+    max_tokens: 1000
   temperature: 0.7
   max_tokens: 1000
 
