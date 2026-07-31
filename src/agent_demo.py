@@ -9,7 +9,7 @@ from collections.abc import Callable
 
 from dotenv import load_dotenv
 
-from src.llm_client import LLMClient
+from src.rag.llm_client import LLMClient
 
 # 加载 .env
 load_dotenv()
@@ -204,7 +204,7 @@ class ReActAgent:
         for step in range(max_steps):
             # 1 推理reasoning: 调用LLM获取下一步思考
             response = self.llm.client.chat.completions.create(
-                model=os.getenv("DEEPSEEK_MODEL_FLASH", "deepseek-chat"),
+                model=os.getenv("DEEPSEEK_MODEL_FLASH", "deepseek-v4-flash"),
                 messages=messages,  # type: ignore
                 temperature=0.3,
             )
