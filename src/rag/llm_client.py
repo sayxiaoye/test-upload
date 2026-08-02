@@ -15,6 +15,7 @@ switch models by changing config, not code. Simple queries go to the fast model
 to save cost, complex reasoning goes to the pro model for quality."
 """
 
+import logging  # Python 标准日志库，替代 print() 做分级日志输出
 import os
 
 from dotenv import load_dotenv
@@ -166,8 +167,10 @@ class LLMClient:
 
             # 检查 content 是否为空（非必须，但建议）
             if not msg["content"].strip():
-                # 发出警告，但不中断执行
-                print(f"⚠️ 警告: 消息 {i} 的 content 为空或只有空白字符")
+                # 发出警告日志，但不中断执行
+                logging.getLogger("LLMClient").warning(
+                    "消息 %d 的 content 为空或只有空白字符", i
+                )
 
     def chat(
         self,
@@ -228,8 +231,8 @@ class LLMClient:
             content = response.choices[0].message.content
             return str(content) if content is not None else ""
         except Exception as e:
-            # 打印错误方便排查，然后向上抛出让调用方处理
-            print(f"❌ API 调用失败: {e}")
+            # 记录错误日志方便排查，然后向上抛出让调用方处理
+            logging.getLogger("LLMClient").error("API 调用失败: %s", e)
             raise
 
     # ========================================================================
@@ -337,7 +340,7 @@ class LLMClient:
         for alias in aliases:
             # 解析别名 → 实际模型名
             model = self._resolve_model(model=None, model_alias=alias)
-            print(f"🔄 调用模型: [{alias}] -> {model}")  # 进度提示
+            logging.getLogger("LLMClient").info("调用模型: [%s] -> %s", alias, model)
 
             try:
                 answer = self.chat(messages=messages, model_alias=alias)

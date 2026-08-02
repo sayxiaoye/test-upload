@@ -78,6 +78,7 @@ ignore = [
     "B008",  # 函数调用默认参数（有争议）
     "N815",  # 要求类作用域中的变量使用 snake_case（蛇形命名法），而不是 mixedCase（混合大小写）
     "PLC0415",   # 允许 import 不在文件顶部
+    "N806",  # 要求函数内的局部变量名采用 snake_case（小写加下划线）
 ]
 
 [tool.ruff.format]

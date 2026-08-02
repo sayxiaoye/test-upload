@@ -1,3 +1,4 @@
+import logging  # 替代 print() 的日志输出
 from typing import Any
 
 import requests
@@ -40,7 +41,7 @@ def fetch_post(post_id: int):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"API 请求失败: {e}")
+        logging.getLogger("APIClient").error("API 请求失败: %s", e)
         return {}
 
 

@@ -11,7 +11,7 @@ server:
 
 logging:
   level: "INFO"
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s)"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 models:
   default: "gpt-3.5-turbo"
