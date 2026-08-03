@@ -50,6 +50,10 @@ def test_chat_raises_for_unknown_alias():
     llm = LLMClient()
     llm.model_aliases = {"fast": "deepseek-v4-flash"}
 
+    # 注入 mock 客户端以跳过 API Key 检查
+    completions = _DummyCompletions()
+    llm.client = cast(Any, _DummyClient(completions))
+
     try:
         llm.chat([{"role": "user", "content": "hi"}], model_alias="unknown")
     except ValueError as error:

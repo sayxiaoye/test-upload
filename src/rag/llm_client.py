@@ -41,13 +41,21 @@ class LLMClient:
     VALID_ROLES = {"system", "user", "assistant", "tool"}
 
     def __init__(self):
-        # --- 初始化 OpenAI 兼容客户端 ---
+        # --- 初始化 OpenAI 兼容客户端（容错：CI 环境无 API Key 时不崩溃）---
         # api_key: 从 .env 中读取 DEEPSEEK_API_KEY，不硬编码在代码里
         # base_url: DeepSeek API 地址，也允许通过环境变量覆盖
-        self.client = OpenAI(
-            api_key=os.getenv("DEEPSEEK_API_KEY"),
-            base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
-        )
+        api_key = os.getenv("DEEPSEEK_API_KEY")
+        if api_key:
+            self.client = OpenAI(
+                api_key=api_key,
+                base_url=os.getenv(
+                    "DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"
+                ),
+            )
+        else:
+            # CI / 无密钥环境：允许创建实例用于测试纯逻辑方法
+            # 调用 chat() 时会给出清晰的错误提示
+            self.client = None  # type: ignore[assignment]
 
         # --- 读取配置 ---
         config = get_config()  # 获取全局配置单例
@@ -204,7 +212,13 @@ class LLMClient:
         # 1. 验证消息格式（检查 role、content 等字段是否合法）
         self._validate_messages(messages)
 
-        # 2. 解析模型名：三级优先级 model > model_alias > 默认配置
+        # 2. 检查 API 客户端是否可用（CI 环境无密钥时给出清晰提示）
+        if self.client is None:
+            raise RuntimeError(
+                "API 客户端未初始化：请在 .env 中设置 DEEPSEEK_API_KEY"
+            )
+
+        # 3. 解析模型名：三级优先级 model > model_alias > 默认配置
         resolved_model = self._resolve_model(model=model, model_alias=model_alias)
 
         # 3. 解析温度: 传了值就用，没传就用配置默认值
