@@ -34,7 +34,7 @@ class SimpleReranker:
     """
 
     def __init__(self):
-        print(f"{'=' * 20} SimpleReranker {'=' * 20}")
+        print(f"\033[1;32m{'=' * 20} 【SimpleReranker】 {'=' * 20}\033[0m")
 
         self.llm = LLMClient()
 
@@ -111,7 +111,7 @@ class SimpleReranker:
                 reranked.sort(key=lambda x: x[1], reverse=True)
                 return reranked[:top_k]
         except Exception as e:
-            print(f"⚠️ 重排失败，返回原始结果: {e}")
+            print(f"\033[1;32m⚠️ 重排失败，返回原始结果: {e}\033[0m")
 
         # 降级：按原顺序返回
         return candidates[:top_k]
@@ -121,10 +121,10 @@ class CrossEncoderReranker:
     """基于 Cross-Encoder 的精排器。"""
 
     def __init__(self, model_name: str = DEFAULT_CROSS_ENCODER_MODEL):
-        print(f"{'=' * 20} CrossEncoderReranker {'=' * 20}")
+        print(f"\033[1;32m{'=' * 20} 【CrossEncoder】 {'=' * 20}\033[0m")
 
         self.model = CrossEncoder(model_name)
-        print(f"📂 找到本地模型: {get_model_display_name(model_name)}")
+        print(f"\033[1;32m📂 找到本地模型: {get_model_display_name(model_name)}\033[0m")
 
     @staticmethod
     def _sigmoid(score: float) -> float:
@@ -136,6 +136,7 @@ class CrossEncoderReranker:
         candidates: list[tuple[str, float]],
         top_k: int = 3,
     ) -> list[tuple[str, float]]:
+        print(f"\033[1;32m{'=' * 20} 【CrossEncoder】-rerank{'=' * 20}\033[0m")
         if not candidates:
             return []
 
@@ -153,7 +154,7 @@ class Reranker:
     """正式重排器，优先使用 Cross-Encoder，失败时回退到简单实现。"""
 
     def __init__(self, model_name: str = DEFAULT_CROSS_ENCODER_MODEL):
-        print(f"{'=' * 20} Reranker {'=' * 20}")
+        print(f"\033[1;32m{'=' * 20} 【Reranker】 {'=' * 20}\033[0m")
 
         self.backend: SimpleReranker | CrossEncoderReranker
 
@@ -161,7 +162,7 @@ class Reranker:
             self.backend = CrossEncoderReranker(model_name=model_name)
             self.backend_name = "cross-encoder"
         except Exception as exc:
-            print(f"⚠️ Cross-Encoder 不可用，回退到 SimpleReranker: {exc}")
+            print(f"\033[1;32m⚠️ Cross-Encoder 不可用，回退到 SimpleReranker: {exc}\033[0m")
             self.backend = SimpleReranker()
             self.backend_name = "simple"
 
@@ -171,4 +172,5 @@ class Reranker:
         candidates: list[tuple[str, float]],
         top_k: int = 3,
     ) -> list[tuple[str, float]]:
+        print(f"\033[1;32m{'=' * 20} 【Reranker】-rerank{'=' * 20}\033[0m")
         return self.backend.rerank(query, candidates, top_k=top_k)

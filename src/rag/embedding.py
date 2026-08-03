@@ -39,7 +39,7 @@ class EmbeddingClient:
         # model_name: str = "D:/AI_Models/huggingface/hub/models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/snapshots/e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
         model_name: str = DEFAULT_EMBEDDING_MODEL,
     ):
-        print(f"{'=' * 20} EmbeddingClient {'=' * 20}")
+        print(f"\033[1;34m{'=' * 20} 【EmbeddingClient】 {'=' * 20}\033[0m")
 
         """
         初始化 Embedding 模型
@@ -64,18 +64,16 @@ class EmbeddingClient:
             """
 
         self.model = SentenceTransformer(model_name)
-        print(f"📂 找到本地模型: {get_model_display_name(model_name)}")
+        print(f"\033[1;34m📂 找到本地模型: {get_model_display_name(model_name)}\033[0m")
         self.dimension = self.model.get_embedding_dimension()
-        print(f"✅ Embedding模型加载成功！向量维度: {self.dimension}")
+        print(f"\033[1;34m✅ Embedding模型加载成功！向量维度: {self.dimension}\033[0m")
 
     def encode(self, texts: list[str]) -> np.ndarray:
-        """将文本转换为向量"""
+        print("\033[1;34m【Embedding encode】将文本转换为向量\033[0m")
         return self.model.encode(texts, normalize_embeddings=True)
 
     def cosine_similarity(self, vec1: np.ndarray, vec2: np.ndarray) -> float:
-        """计算两个向量的余弦相似度"""
         return np.dot(vec1, vec2)
-
 
 # 在类外部定义（顶级函数）
 def get_similarity_label(score: float) -> str:

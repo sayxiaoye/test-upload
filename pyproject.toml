@@ -20,6 +20,12 @@ requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
 
+# ==================== CLI 入口点（pip install 后可命令行调用） ====================
+[project.scripts]
+my-project = "src.app.main:main"         # 统一入口：my-project rag/build/serve
+my-rag = "src.app.rag_cli:main"          # RAG 问答（独立脚本入口）
+my-kb = "src.tools.kb_builder:main"      # 知识库构建工具
+
 # ==================== 依赖分组（PDM） ====================
 
 [tool.pdm]

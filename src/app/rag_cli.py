@@ -63,6 +63,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="包含知识库内容的文件或文件夹路径",
     )
     parser.add_argument(
+        "--index",
+        default=None,
+        help="知识库 JSONL 索引文件路径（默认 data/kb_index.jsonl）",
+    )
+    parser.add_argument(
         "--retrieve-k",
         type=int,
         default=5,
@@ -82,8 +87,27 @@ def main() -> None:
     args = parser.parse_args()
 
     pipeline = RAGPipeline()
-    document = load_document(args.doc_file)
-    pipeline.index_document(document)
+
+    # 加载文档：--doc-file > 预构建知识库 > 内置默认文档
+    doc_source = "内置默认文档"
+    if args.doc_file:
+        # 用户明确指定了原始文档 → 实时处理（临时探索）
+        document = load_document(args.doc_file)
+        pipeline.index_document(document)
+        doc_source = args.doc_file
+    else:
+        # 从知识库加载（--index 覆盖默认路径）
+        index_file = args.index or "data/kb_index.jsonl"
+        index_path = Path(index_file)
+        if index_path.exists():
+            pipeline.load_index(str(index_path))
+            doc_source = f"知识库索引: {index_path.as_posix()}"
+        else:
+            if args.index:
+                raise FileNotFoundError(f"知识库索引文件不存在: {args.index}")
+            document = load_document(None)
+            pipeline.index_document(document)
+
     result = pipeline.query(
         args.question,
         top_k_retrieve=args.retrieve_k,
@@ -92,7 +116,7 @@ def main() -> None:
 
     print("=" * 20 + " RAG_CLI " + "=" * 20)
     print(f"🧠 问题：{args.question}")
-    print(f"📌 使用文档：{args.doc_file or '内置默认文档'}")
+    print(f"📌 使用文档：{doc_source}")
     print("📖 回答：")
     print(result["answer"])
     print("\n来源：")

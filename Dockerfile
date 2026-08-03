@@ -2,12 +2,22 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY pyproject.toml README.md ./
+# 先复制依赖配置文件
+COPY pyproject.toml ./
 
-RUN pip install --no-cache-dir -e .
+# 安装项目依赖 + Web 服务所需的额外依赖
+RUN pip install --no-cache-dir ".[dev]"
 
+# 复制项目源码和配置
 COPY src/ ./src/
 COPY config/ ./config/
-COPY tests/ ./tests/
+COPY data/ ./data/
 
-CMD ["python", "-m", "src.cli", "--help"]
+# 创建日志和下载目录
+RUN mkdir -p logs downloads
+
+# 暴露 FastAPI 默认端口
+EXPOSE 8000
+
+# 启动 FastAPI 服务（host 必须为 0.0.0.0 才能在容器外访问）
+CMD ["python", "-m", "src.app.main", "serve", "--host", "0.0.0.0", "--port", "8000"]

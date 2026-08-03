@@ -12,15 +12,19 @@ class RAGPipeline:
     """RAG 完整流程"""
 
     def __init__(self):
-        print(f"{'=' * 20} RAG Pipeline {'=' * 20}")
+        print(f"{'=' * 20} 【RAG Pipeline】 {'=' * 20}")
 
         self.retriever = Retriever()
         self.reranker = Reranker()
         self.llm = LLMClient()
 
     def index_document(self, text: str) -> None:
-        """检索文档"""
+        """检索文档（从原始文本切分+向量化）"""
         self.retriever.index_document(text)
+
+    def load_index(self, jsonl_path: str) -> None:
+        """从预构建的知识库 JSONL 文件加载索引"""
+        self.retriever.load_from_jsonl(jsonl_path)
 
     def _build_source_prompt(
         self,

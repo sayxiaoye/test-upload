@@ -15,6 +15,9 @@ env/
 .env.local
 .env.*.local
 
+# Packaging
+*.egg-info/
+
 # Testing
 .pytest_cache/
 .mypy_cache/
@@ -39,3 +42,6 @@ logs/
 .coverage
 
 data/jp
+
+# demo/test
+ANSI_Color.py
