@@ -1,52 +1,71 @@
 """
-FastAPI应用
-提供API接口, 包括健康检查、文档处理等
+FastAPI 应用（E6 重写：从文件操作 API → RAG 问答 API）
+
+提供 RAG 问答的 HTTP 接口：
+- GET  /             欢迎页
+- GET  /health       健康检查
+- POST /rag/query    RAG 问答（传入问题，返回回答 + 参考来源）
 """
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from src.core import fetch_post, read_note, save_note
+from src.rag.pipeline import RAGPipeline  # RAG 完整流程
 
 # 创建 FastAPI 应用
 app = FastAPI(
-    title="My first Project API",
-    description="A simple API service for demonstrating FastAPI",
+    title="RAG Q&A API",
+    description="面向文档的 RAG 智能问答系统",
     version="0.1.0",
 )
 
+class _AppState:
+    """应用状态容器，避免 global 声明。"""
 
-# ============ 响应模型 ============
-class NoteResponse(BaseModel):
-    """笔记本响应模型"""
-
-    content: str
+    pipeline: RAGPipeline | None = None
 
 
-class NoteRequest(BaseModel):
-    """笔记本请求模型"""
+def _get_pipeline() -> RAGPipeline:
+    """懒加载 RAG pipeline（首次请求时初始化，加载默认知识库）。"""
+    if _AppState.pipeline is None:
+        _AppState.pipeline = RAGPipeline()
+        # 加载预构建的知识库索引
+        from pathlib import Path
 
-    content: str
-    filename: str = "data/note.txt"
+        index_path = Path("data/kb_index.jsonl")
+        if index_path.exists():
+            _AppState.pipeline.load_index(str(index_path))
+    return _AppState.pipeline
 
 
-class PostResponse(BaseModel):
-    """文章响应模型"""
+# ============ 请求/响应模型 ============
+class RAGQueryRequest(BaseModel):
+    """RAG 问答请求体"""
 
-    id: int
-    title: str
-    body: str
-    userId: int
+    question: str  # 用户问题
+    top_k: int = 3  # 返回的参考片段数量
+
+
+class RAGQueryResponse(BaseModel):
+    """RAG 问答响应体"""
+
+    question: str  # 原始问题
+    answer: str  # 生成的回答
+    sources: list[dict]  # 参考来源 [{content, score}, ...]
 
 
 # ============ API 端点 ============
 @app.get("/")
 async def root():
-    """根路径，返回欢迎信息"""
+    """根路径，返回 API 信息"""
     return {
-        "message": "welcome used My Frist Project API",
+        "service": "RAG Q&A API",
+        "version": "0.1.0",
         "docs": "/docs",
-        "redoc": "/redoc",
+        "endpoints": {
+            "health": "/health",
+            "rag_query": "POST /rag/query",
+        },
     }
 
 
@@ -56,55 +75,31 @@ async def health_check():
     return {"status": "healthy"}
 
 
-@app.get("/notes/{filename:path}")
-async def get_note(filename: str = "data/note.txt") -> NoteResponse:
+@app.post("/rag/query", response_model=RAGQueryResponse)
+async def rag_query(request: RAGQueryRequest):
     """
-    读取笔记本文件内容
+    RAG 问答接口
 
-    Args:
-        filename: 文件路径（相对于项目根目录）
+    传入问题，返回基于知识库的智能回答和参考来源。
 
-    Returns:
-        笔记内容
-    """
-    try:
-        content = read_note(filename)
-        return NoteResponse(content=content)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-
-
-@app.post("/notes")
-async def create_note(request: NoteRequest) -> dict:
-    """
-    保存笔记到文件
-
-    Args:
-        request: 包含内容和文件名的请求体
-
-    Returns:
-        保存结果
+    示例请求体:
+        {"question": "什么是向量数据库？", "top_k": 3}
     """
     try:
-        save_note(request.filename, request.content)
-        return {"status": "success", "message": f"已保存到 {request.filename}"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-
-
-@app.get("/posts/{post_id}")
-async def get_post(post_id: int) -> PostResponse:
-    try:
-        data = fetch_post(post_id)
-        if not data:
-            raise HTTPException(status_code=404, detail="文章不存在")
-        return PostResponse(
-            id=data.get("id", 0),
-            title=data.get("title", ""),
-            body=data.get("body", ""),
-            userId=data.get("userId", 0),
+        pipeline = _get_pipeline()
+        result = pipeline.query(
+            request.question,
+            top_k_retrieve=5,
+            top_k_rerank=request.top_k,
         )
-    except HTTPException:
-        raise
+
+        return RAGQueryResponse(
+            question=request.question,
+            answer=result["answer"],
+            sources=[
+                {"content": s.get("content", ""), "score": s.get("score", 0)}
+                for s in result["sources"]
+            ],
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

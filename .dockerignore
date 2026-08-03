@@ -10,7 +10,6 @@ __pycache__/
 pdm.lock
 *.log
 data/
-week1_practice/
 .DS_Store
 *.md
 !README.md

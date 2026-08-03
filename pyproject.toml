@@ -61,7 +61,6 @@ exclude = [
     "venv",
     ".venv",
     "*.egg-info",
-    "week1_practice",
 ]
 
 [tool.ruff.lint]
@@ -102,7 +101,6 @@ warn_unused_configs = true
 ignore_missing_imports = true
 check_untyped_defs = true       # 新增：检查无类型函数
 disallow_any_unimported = false  # 新增：禁止未导入的 Any
-exclude = ["week1_practice"]
 
 # ✅ 新增：对特定库禁用类型检查
 [[tool.mypy.overrides]]
