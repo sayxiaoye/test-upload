@@ -74,6 +74,7 @@ def _cmd_rag(args: argparse.Namespace) -> None:
         args.question,
         top_k_retrieve=args.retrieve_k,
         top_k_rerank=args.rerank_k,
+        retrieval_mode=args.retrieval_mode,
     )
 
     # 输出结果
@@ -169,6 +170,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rag_parser.add_argument(
         "--rerank-k", type=int, default=3, help="重排后用于回答的片段数（默认 3）"
+    )
+    rag_parser.add_argument(
+        "--retrieval-mode",
+        default=None,
+        choices=["embedding", "bm25", "hybrid"],
+        help="检索模式（默认使用 config.yaml 中的配置）",
     )
 
     # ---- build 子命令 ----

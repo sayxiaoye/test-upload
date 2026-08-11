@@ -89,6 +89,7 @@ class RAGPipeline:
         question: str,
         top_k_retrieve: int = 5,
         top_k_rerank: int = 3,
+        retrieval_mode: str | None = None,
     ) -> dict:
         """
         执行RAG问答
@@ -97,6 +98,10 @@ class RAGPipeline:
             question: 用户问题
             top_k_retrieve: 找回数量
             top_k_rerank: 重排返回数量
+            retrieval_mode: 检索模式（可选）
+                - "embedding": 纯向量语义检索
+                - "bm25": 纯关键词检索
+                - "hybrid": 混合检索（默认使用 Retriever 的配置）
 
         Retrun:
             {
@@ -108,7 +113,11 @@ class RAGPipeline:
         """
 
         # Step 1: 检索（召回）
-        candidates = self.retriever.retrieve(question, top_k=top_k_retrieve)
+        candidates = self.retriever.retrieve(
+            question,
+            top_k=top_k_retrieve,
+            mode=retrieval_mode,
+        )
 
         if not candidates:
             return {

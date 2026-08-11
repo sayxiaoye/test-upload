@@ -1,5 +1,6 @@
 """RAG 领域包。"""
 
+from src.rag.bm25 import BM25Retriever  # E9 新增: BM25 关键词检索
 from src.rag.chunker import TextChunker
 from src.rag.embedding import EmbeddingClient
 from src.rag.llm_client import LLMClient
@@ -30,4 +31,6 @@ __all__ = [
     "render_rag_qa",
     "render_document_summary",
     "render_relevance_eval",
+    # E9 新增导出
+    "BM25Retriever",
 ]

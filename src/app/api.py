@@ -44,6 +44,7 @@ class RAGQueryRequest(BaseModel):
 
     question: str  # 用户问题
     top_k: int = 3  # 返回的参考片段数量
+    retrieval_mode: str | None = None  # retrieval mode: embedding | bm25 | hybrid
 
 
 class RAGQueryResponse(BaseModel):
@@ -91,6 +92,7 @@ async def rag_query(request: RAGQueryRequest):
             request.question,
             top_k_retrieve=5,
             top_k_rerank=request.top_k,
+            retrieval_mode=request.retrieval_mode,
         )
 
         return RAGQueryResponse(

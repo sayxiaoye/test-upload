@@ -31,3 +31,7 @@ rag:
   chunk_overlap: 50
   top_k: 3
   rerank_threshold: 0.7
+  # E9 新增: 检索模式配置
+  retrieval:
+    mode: "hybrid"        # embedding | bm25 | hybrid
+    bm25_weight: 0.3      # 混合检索中 BM25 的权重 (0.0-1.0)，仅 hybrid 模式生效
