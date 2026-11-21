@@ -7,8 +7,10 @@ FastAPI 应用（E6 重写：从文件操作 API → RAG 问答 API）
 - POST /rag/query    RAG 问答（传入问题，返回回答 + 参考来源）
 """
 
+from typing import Literal
+
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from src.rag.pipeline import RAGPipeline  # RAG 完整流程
 
@@ -43,8 +45,16 @@ class RAGQueryRequest(BaseModel):
     """RAG 问答请求体"""
 
     question: str  # 用户问题
-    top_k: int = 3  # 返回的参考片段数量
-    retrieval_mode: str | None = None  # retrieval mode: embedding | bm25 | hybrid
+    top_k: int = Field(default=3, ge=1, le=10)  # 返回的参考片段数量
+    retrieval_mode: Literal["embedding", "bm25", "hybrid"] | None = None
+
+    @field_validator("question")
+    @classmethod
+    def strip_question(cls, value: str) -> str:
+        stripped = value.strip()
+        if len(stripped) == 0:
+            raise ValueError("question must not be blank")
+        return stripped
 
 
 class RAGQueryResponse(BaseModel):
